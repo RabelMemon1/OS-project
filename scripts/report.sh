@@ -1,0 +1,23 @@
+#!/bin/bash
+REPORT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/reports"
+mkdir -p "$REPORT_DIR"
+FILE="$REPORT_DIR/system_report_$(date +%Y%m%d_%H%M%S).txt"
+
+echo "==========================================" > "$FILE"
+echo "       SYSTEM MONITOR REPORT              " >> "$FILE"
+echo "       Date: $(date)                     " >> "$FILE"
+echo "==========================================" >> "$FILE"
+echo "" >> "$FILE"
+echo "--- CPU USAGE ---" >> "$FILE"
+top -bn1 | head -n 5 >> "$FILE"
+echo "" >> "$FILE"
+echo "--- MEMORY USAGE ---" >> "$FILE"
+free -h >> "$FILE"
+echo "" >> "$FILE"
+echo "--- DISK USAGE ---" >> "$FILE"
+df -h >> "$FILE"
+echo "" >> "$FILE"
+echo "--- TOP 10 PROCESSES ---" >> "$FILE"
+ps -eo pid,comm,%cpu,%mem --sort=-%cpu | head -n 11 >> "$FILE"
+
+echo "$FILE"

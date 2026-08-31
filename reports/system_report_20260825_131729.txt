@@ -1,0 +1,48 @@
+==========================================
+       SYSTEM MONITOR REPORT              
+       Date: Tue Aug 25 13:17:29 PKT 2026                     
+==========================================
+
+--- CPU USAGE ---
+top - 13:17:30 up 9 min,  1 user,  load average: 0.08, 0.11, 0.08
+Tasks:  26 total,   1 running,  25 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.0 us,  2.2 sy,  0.0 ni, 97.8 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st 
+MiB Mem :   5866.6 total,   5007.2 free,    486.7 used,    514.4 buff/cache     
+MiB Swap:   2048.0 total,   2048.0 free,      0.0 used.   5379.9 avail Mem 
+
+--- MEMORY USAGE ---
+               total        used        free      shared  buff/cache   available
+Mem:           5.7Gi       486Mi       4.9Gi       3.5Mi       514Mi       5.3Gi
+Swap:          2.0Gi          0B       2.0Gi
+
+--- DISK USAGE ---
+Filesystem      Size  Used Avail Use% Mounted on
+none            2.9G     0  2.9G   0% /usr/lib/modules/6.18.33.2-microsoft-standard-WSL2
+none            2.9G  4.0K  2.9G   1% /mnt/wsl
+drivers         239G  189G   50G  80% /usr/lib/wsl/drivers
+/dev/sdd       1007G  1.9G  954G   1% /
+none            2.9G   32K  2.9G   1% /mnt/wslg
+none            2.9G     0  2.9G   0% /usr/lib/wsl/lib
+rootfs          2.9G  2.8M  2.9G   1% /init
+none            2.9G  472K  2.9G   1% /run
+none            2.9G     0  2.9G   0% /run/lock
+none            2.9G   16K  2.9G   1% /run/shm
+none            2.9G   80K  2.9G   1% /mnt/wslg/versions.txt
+none            2.9G   80K  2.9G   1% /mnt/wslg/doc
+C:\             239G  189G   50G  80% /mnt/c
+D:\             235G   46G  189G  20% /mnt/d
+E:\             231G  7.5G  224G   4% /mnt/e
+tmpfs           587M   20K  587M   1% /run/user/0
+
+--- TOP 10 PROCESSES ---
+    PID COMMAND         %CPU %MEM
+    895 ps               100  0.0
+    884 bash             3.7  0.0
+    725 python3          3.0  0.5
+    721 python3          1.5  0.5
+      1 systemd          0.4  0.2
+    115 systemd-udevd    0.3  0.1
+     66 systemd-journal  0.0  0.2
+    127 systemd-resolve  0.0  0.2
+    216 unattended-upgr  0.0  0.3
+    391 systemd          0.0  0.1

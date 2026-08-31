@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux System Monitor</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-title">
+            <h2>🖥️ SysMonitor</h2>
+            <p>Linux Monitoring Tool</p>
+        </div>
+        <nav>
+            <button class="nav-btn active" onclick="showTab('overview')">📊 Overview</button>
+            <button class="nav-btn" onclick="showTab('cpu')">⚙️ CPU</button>
+            <button class="nav-btn" onclick="showTab('memory')">🧠 Memory</button>
+            <button class="nav-btn" onclick="showTab('disk')">💾 Disk</button>
+            <button class="nav-btn" onclick="showTab('processes')">📋 Processes</button>
+            <button class="nav-btn" onclick="showTab('live')">📡 Live Monitor</button>
+            <button class="nav-btn" onclick="showTab('report')">📄 Report</button>
+        </nav>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <!-- OVERVIEW TAB -->
+        <div id="tab-overview" class="tab active">
+            <h1>System Overview</h1>
+            <div class="cards-row">
+                <div class="card" id="overview-cpu">
+                    <h3>⚙️ CPU Usage</h3>
+                    <div class="big-number" id="ov-cpu-val">--</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="ov-cpu-bar"></div>
+                    </div>
+                    <div class="badge" id="ov-cpu-status">--</div>
+                </div>
+                <div class="card" id="overview-mem">
+                    <h3>🧠 Memory Usage</h3>
+                    <div class="big-number" id="ov-mem-val">--</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="ov-mem-bar"></div>
+                    </div>
+                    <div class="badge" id="ov-mem-status">--</div>
+                </div>
+                <div class="card" id="overview-disk">
+                    <h3>💾 Disk Usage</h3>
+                    <div class="big-number" id="ov-disk-val">--</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="ov-disk-bar"></div>
+                    </div>
+                    <div class="badge" id="ov-disk-status">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CPU TAB -->
+        <div id="tab-cpu" class="tab">
+            <h1>CPU Utilization</h1>
+            <div class="card">
+                <table class="info-table">
+                    <tr>
+                        <td>CPU Usage</td>
+                        <td id="cpu-usage">--</td>
+                    </tr>
+                    <tr>
+                        <td>CPU Load (1 min)</td>
+                        <td id="cpu-load">--</td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td id="cpu-status">--</td>
+                    </tr>
+                </table>
+                <div class="progress-bar" style="margin-top:20px">
+                    <div class="progress-fill" id="cpu-bar"></div>
+                </div>
+                <button class="btn-refresh" onclick="loadCPU()">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <!-- MEMORY TAB -->
+        <div id="tab-memory" class="tab">
+            <h1>Memory Usage</h1>
+            <div class="card">
+                <table class="info-table">
+                    <tr>
+                        <td>Total RAM</td>
+                        <td id="mem-total">--</td>
+                    </tr>
+                    <tr>
+                        <td>Used RAM</td>
+                        <td id="mem-used">--</td>
+                    </tr>
+                    <tr>
+                        <td>Available</td>
+                        <td id="mem-avail">--</td>
+                    </tr>
+                    <tr>
+                        <td>Usage %</td>
+                        <td id="mem-usage">--</td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td id="mem-status">--</td>
+                    </tr>
+                </table>
+                <div class="progress-bar" style="margin-top:20px">
+                    <div class="progress-fill" id="mem-bar"></div>
+                </div>
+                <button class="btn-refresh" onclick="loadMemory()">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <!-- DISK TAB -->
+        <div id="tab-disk" class="tab">
+            <h1>Disk / Filesystem Usage</h1>
+            <div class="card">
+                <table class="data-table" id="disk-table">
+                    <thead>
+                        <tr>
+                            <th>Filesystem</th>
+                            <th>Size</th>
+                            <th>Used</th>
+                            <th>Available</th>
+                            <th>Use%</th>
+                            <th>Mount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="disk-body">
+                        <tr>
+                            <td colspan="7">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="btn-refresh" onclick="loadDisk()">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <!-- PROCESSES TAB -->
+        <div id="tab-processes" class="tab">
+            <h1>Active Processes</h1>
+            <div class="card">
+                <table class="data-table" id="process-table">
+                    <thead>
+                        <tr>
+                            <th>PID</th>
+                            <th>Process Name</th>
+                            <th>CPU%</th>
+                            <th>MEM%</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="process-body">
+                        <tr>
+                            <td colspan="5">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="btn-refresh" onclick="loadProcesses()">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <!-- LIVE MONITOR TAB -->
+        <div id="tab-live" class="tab">
+            <h1>📡 Live System Monitor</h1>
+            <div class="cards-row">
+                <div class="card">
+                    <h3>⚙️ CPU</h3>
+                    <div class="big-number" id="live-cpu">--</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="live-cpu-bar"></div>
+                    </div>
+                    <div class="badge" id="live-cpu-status">--</div>
+                </div>
+                <div class="card">
+                    <h3>🧠 RAM</h3>
+                    <div class="big-number" id="live-mem">--</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="live-mem-bar"></div>
+                    </div>
+                    <div class="badge" id="live-mem-status">--</div>
+                </div>
+                <div class="card">
+                    <h3>💾 Disk</h3>
+                    <div class="big-number" id="live-disk">--</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="live-disk-bar"></div>
+                    </div>
+                    <div class="badge" id="live-disk-status">--</div>
+                </div>
+            </div>
+            <div class="live-status" id="live-status-msg" style="margin-top:15px">Starting live monitor...</div>
+            <button class="btn-refresh" onclick="toggleLive()" id="live-btn" style="margin-top:15px">⏸️ Pause</button>
+        </div>
+
+        <!-- REPORT TAB -->
+        <div id="tab-report" class="tab">
+            <h1>System Report</h1>
+            <div class="card">
+                <p>Generate a complete system report including CPU, Memory, Disk, and Process information.</p>
+                <p>The report will be saved as a <strong>.txt file</strong> and downloaded automatically.</p>
+                <button class="btn-generate" onclick="generateReport()">📄 Generate & Download Report</button>
+                <div id="report-status" style="margin-top:20px"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- KILL CONFIRMATION MODAL -->
+    <div id="modal" class="modal-overlay" style="display:none">
+        <div class="modal-box">
+            <h3>⚠️ Confirm Process Termination</h3>
+            <p id="modal-msg"></p>
+            <div class="modal-buttons">
+                <button class="btn-confirm" onclick="confirmKill()">Yes, Terminate</button>
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+
+</html>
