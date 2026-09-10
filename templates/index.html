@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Linux System Monitor</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -17,13 +18,13 @@
             <p>Linux Monitoring Tool</p>
         </div>
         <nav>
-            <button class="nav-btn active" onclick="showTab('overview')">📊 Overview</button>
-            <button class="nav-btn" onclick="showTab('cpu')">⚙️ CPU</button>
-            <button class="nav-btn" onclick="showTab('memory')">🧠 Memory</button>
-            <button class="nav-btn" onclick="showTab('disk')">💾 Disk</button>
-            <button class="nav-btn" onclick="showTab('processes')">📋 Processes</button>
-            <button class="nav-btn" onclick="showTab('live')">📡 Live Monitor</button>
-            <button class="nav-btn" onclick="showTab('report')">📄 Report</button>
+            <button class="nav-btn active" onclick="showTab('overview', event)">📊 Overview</button>
+            <button class="nav-btn" onclick="showTab('cpu', event)">⚙️ CPU</button>
+            <button class="nav-btn" onclick="showTab('memory', event)">🧠 Memory</button>
+            <button class="nav-btn" onclick="showTab('disk', event)">💾 Disk</button>
+            <button class="nav-btn" onclick="showTab('processes', event)">📋 Processes</button>
+            <button class="nav-btn" onclick="showTab('live', event)">📡 Live Monitor</button>
+            <button class="nav-btn" onclick="showTab('report', event)">📄 Report</button>
         </nav>
     </div>
 
@@ -33,8 +34,9 @@
         <!-- OVERVIEW TAB -->
         <div id="tab-overview" class="tab active">
             <h1>System Overview</h1>
+            <div class="auto-refresh-badge">🔄 Auto-refreshing every 5 seconds</div>
             <div class="cards-row">
-                <div class="card" id="overview-cpu">
+                <div class="card">
                     <h3>⚙️ CPU Usage</h3>
                     <div class="big-number" id="ov-cpu-val">--</div>
                     <div class="progress-bar">
@@ -42,7 +44,7 @@
                     </div>
                     <div class="badge" id="ov-cpu-status">--</div>
                 </div>
-                <div class="card" id="overview-mem">
+                <div class="card">
                     <h3>🧠 Memory Usage</h3>
                     <div class="big-number" id="ov-mem-val">--</div>
                     <div class="progress-bar">
@@ -50,7 +52,7 @@
                     </div>
                     <div class="badge" id="ov-mem-status">--</div>
                 </div>
-                <div class="card" id="overview-disk">
+                <div class="card">
                     <h3>💾 Disk Usage</h3>
                     <div class="big-number" id="ov-disk-val">--</div>
                     <div class="progress-bar">
@@ -59,119 +61,150 @@
                     <div class="badge" id="ov-disk-status">--</div>
                 </div>
             </div>
+            <div class="last-updated" id="overview-last-updated"></div>
         </div>
 
         <!-- CPU TAB -->
         <div id="tab-cpu" class="tab">
             <h1>CPU Utilization</h1>
-            <div class="card">
-                <table class="info-table">
-                    <tr>
-                        <td>CPU Usage</td>
-                        <td id="cpu-usage">--</td>
-                    </tr>
-                    <tr>
-                        <td>CPU Load (1 min)</td>
-                        <td id="cpu-load">--</td>
-                    </tr>
-                    <tr>
-                        <td>Status</td>
-                        <td id="cpu-status">--</td>
-                    </tr>
-                </table>
-                <div class="progress-bar" style="margin-top:20px">
-                    <div class="progress-fill" id="cpu-bar"></div>
+            <div class="auto-refresh-badge">🔄 Auto-refreshing every 5 seconds</div>
+            <div style="display:flex; gap:20px; align-items:stretch">
+                <div class="card" style="width:250px; flex-shrink:0">
+                    <h3 style="color:#00d4ff; margin-bottom:15px">⚙️ CPU Stats</h3>
+                    <table class="info-table">
+                        <tr>
+                            <td>CPU Usage</td>
+                            <td id="cpu-usage">--</td>
+                        </tr>
+                        <tr>
+                            <td>Load (1 min)</td>
+                            <td id="cpu-load">--</td>
+                        </tr>
+                        <tr>
+                            <td>Status</td>
+                            <td id="cpu-status">--</td>
+                        </tr>
+                    </table>
+                    <div class="progress-bar" style="margin-top:15px">
+                        <div class="progress-fill" id="cpu-bar"></div>
+                    </div>
+                    <div style="margin-top:20px; text-align:center; color:#888; font-size:12px">
+                        Current
+                        <div id="cpu-current" style="font-size:42px; font-weight:bold; color:#00d4ff; line-height:1.2">
+                            --
+                        </div>
+                    </div>
                 </div>
-                <button class="btn-refresh" onclick="loadCPU()">🔄 Refresh</button>
+                <div class="card" style="flex:1">
+                    <h3 style="color:#00d4ff; margin-bottom:4px">📈 CPU Usage History</h3>
+                    <p style="font-size:11px; color:#555; margin-bottom:12px">
+                        Last 10 readings — updates every 5 seconds
+                    </p>
+                    <!-- FIX: canvas now sits inside a fixed-height wrapper (.chart-wrapper
+                         in style.css) instead of a flex:1 card, so the chart no longer
+                         keeps growing on every refresh. -->
+                    <div class="chart-wrapper">
+                        <canvas id="cpuChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- MEMORY TAB -->
         <div id="tab-memory" class="tab">
             <h1>Memory Usage</h1>
-            <div class="card">
-                <table class="info-table">
-                    <tr>
-                        <td>Total RAM</td>
-                        <td id="mem-total">--</td>
-                    </tr>
-                    <tr>
-                        <td>Used RAM</td>
-                        <td id="mem-used">--</td>
-                    </tr>
-                    <tr>
-                        <td>Available</td>
-                        <td id="mem-avail">--</td>
-                    </tr>
-                    <tr>
-                        <td>Usage %</td>
-                        <td id="mem-usage">--</td>
-                    </tr>
-                    <tr>
-                        <td>Status</td>
-                        <td id="mem-status">--</td>
-                    </tr>
-                </table>
-                <div class="progress-bar" style="margin-top:20px">
-                    <div class="progress-fill" id="mem-bar"></div>
+            <div class="auto-refresh-badge">🔄 Auto-refreshing every 5 seconds</div>
+            <div style="display:flex; gap:20px; align-items:stretch">
+                <div class="card" style="width:250px; flex-shrink:0">
+                    <h3 style="color:#a855f7; margin-bottom:15px">🧠 RAM Stats</h3>
+                    <table class="info-table">
+                        <tr>
+                            <td>Total RAM</td>
+                            <td id="mem-total">--</td>
+                        </tr>
+                        <tr>
+                            <td>Used RAM</td>
+                            <td id="mem-used">--</td>
+                        </tr>
+                        <tr>
+                            <td>Available</td>
+                            <td id="mem-avail">--</td>
+                        </tr>
+                        <tr>
+                            <td>Usage %</td>
+                            <td id="mem-usage">--</td>
+                        </tr>
+                        <tr>
+                            <td>Status</td>
+                            <td id="mem-status">--</td>
+                        </tr>
+                    </table>
+                    <div class="progress-bar" style="margin-top:15px">
+                        <div class="progress-fill" id="mem-bar"></div>
+                    </div>
+                    <div style="margin-top:20px; text-align:center; color:#888; font-size:12px">
+                        Current
+                        <div id="mem-current" style="font-size:42px; font-weight:bold; color:#a855f7; line-height:1.2">
+                            --
+                        </div>
+                    </div>
                 </div>
-                <button class="btn-refresh" onclick="loadMemory()">🔄 Refresh</button>
+                <div class="card" style="flex:1">
+                    <h3 style="color:#a855f7; margin-bottom:4px">📈 RAM Usage History</h3>
+                    <p style="font-size:11px; color:#555; margin-bottom:12px">
+                        Last 10 readings — updates every 5 seconds
+                    </p>
+                    <div class="chart-wrapper">
+                        <canvas id="memChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- DISK TAB -->
+        <!-- DISK TAB (was missing — this is why Disk showed nothing) -->
         <div id="tab-disk" class="tab">
-            <h1>Disk / Filesystem Usage</h1>
+            <h1>💾 Disk Usage</h1>
             <div class="card">
-                <table class="data-table" id="disk-table">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>Filesystem</th>
                             <th>Size</th>
                             <th>Used</th>
                             <th>Available</th>
-                            <th>Use%</th>
-                            <th>Mount</th>
+                            <th>Use %</th>
+                            <th>Mounted On</th>
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody id="disk-body">
-                        <tr>
-                            <td colspan="7">Loading...</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="disk-body"></tbody>
                 </table>
-                <button class="btn-refresh" onclick="loadDisk()">🔄 Refresh</button>
             </div>
         </div>
 
-        <!-- PROCESSES TAB -->
+        <!-- PROCESSES TAB (was missing — this is why Processes showed nothing) -->
         <div id="tab-processes" class="tab">
-            <h1>Active Processes</h1>
+            <h1>📋 Running Processes</h1>
             <div class="card">
-                <table class="data-table" id="process-table">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>PID</th>
-                            <th>Process Name</th>
-                            <th>CPU%</th>
-                            <th>MEM%</th>
+                            <th>Name</th>
+                            <th>CPU %</th>
+                            <th>Memory %</th>
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="process-body">
-                        <tr>
-                            <td colspan="5">Loading...</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="process-body"></tbody>
                 </table>
-                <button class="btn-refresh" onclick="loadProcesses()">🔄 Refresh</button>
             </div>
         </div>
 
         <!-- LIVE MONITOR TAB -->
         <div id="tab-live" class="tab">
             <h1>📡 Live System Monitor</h1>
+            <div class="auto-refresh-badge">🔄 Auto-refreshing every 5 seconds</div>
             <div class="cards-row">
                 <div class="card">
                     <h3>⚙️ CPU</h3>
@@ -198,24 +231,44 @@
                     <div class="badge" id="live-disk-status">--</div>
                 </div>
             </div>
-            <div class="live-status" id="live-status-msg" style="margin-top:15px">Starting live monitor...</div>
-            <button class="btn-refresh" onclick="toggleLive()" id="live-btn" style="margin-top:15px">⏸️ Pause</button>
+            <div class="live-status" id="live-status-msg">Starting live monitor...</div>
+            <button class="btn-refresh" onclick="toggleLive()" id="live-btn">⏸️ Pause</button>
         </div>
 
         <!-- REPORT TAB -->
         <div id="tab-report" class="tab">
             <h1>System Report</h1>
             <div class="card">
-                <p>Generate a complete system report including CPU, Memory, Disk, and Process information.</p>
-                <p>The report will be saved as a <strong>.txt file</strong> and downloaded automatically.</p>
-                <button class="btn-generate" onclick="generateReport()">📄 Generate & Download Report</button>
+                <p>Generate a complete system report including CPU, Memory, Disk, and Process
+                    information.</p>
+                <p>The report will be downloaded as a formatted <strong>.docx (Word)</strong>
+                    file.</p>
+                <button class="btn-generate" onclick="generateReport()">
+                    📄 Generate & Download Report
+                </button>
                 <div id="report-status" style="margin-top:20px"></div>
             </div>
         </div>
 
+        <!-- REPORT TAB -->
+        <div id="tab-report" class="tab">
+            <h1>System Test</h1>
+            <div class="card">
+                <p>Generate a complete system report including CPU, Memory, Disk, and Process
+                    information.</p>
+                <p>The report will be downloaded as a formatted <strong>.docx (Word)</strong>
+                    file.</p>
+                <button class="btn-generate" onclick="generateReport()">
+                    📄 Generate & Download Report
+                </button>
+                <div id="report-status" style="margin-top:20px"></div>
+            </div>
+        </div>
+
+
     </div>
 
-    <!-- KILL CONFIRMATION MODAL -->
+    <!-- KILL MODAL -->
     <div id="modal" class="modal-overlay" style="display:none">
         <div class="modal-box">
             <h3>⚠️ Confirm Process Termination</h3>

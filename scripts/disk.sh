@@ -13,4 +13,4 @@ BEGIN { printf "[" }
     if (NR > 1) printf ",";
     printf "{\"filesystem\":\"%s\",\"size\":\"%s\",\"used\":\"%s\",\"avail\":\"%s\",\"use_pct\":%d,\"mounted\":\"%s\",\"status\":\"%s\"}", $1, $2, $3, $4, $5, $6, status;
 }
-END { printf "]" }'
+END { printf "]" }'  
